@@ -36,6 +36,8 @@ export default function Home() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionProgress, setExecutionProgress] = useState(0);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [reportViewerOpen, setReportViewerOpen] = useState(false);
+  const [selectedHistoricalReport, setSelectedHistoricalReport] = useState(null);
   const [pcaHistory, setPcaHistory] = useState([
     { id: 'PCA-2025-001', date: '2025-11-15', type: 'transit', status: 'completed', violations: 12, score: 85 },
     { id: 'PCA-2025-002', date: '2025-11-10', type: 'import', status: 'completed', violations: 8, score: 72 },
@@ -172,11 +174,150 @@ export default function Home() {
   };
 
   const handleDownloadReport = (reportType) => {
-    alert(`Downloading ${reportType} report...\n\nThis would generate and download:\n- ${reportType} report in PDF format\n- Executive summary with key findings\n- Detailed violation analysis\n- Statistical trends and patterns\n- Compliance recommendations\n\nFile: PCA-${reportType.toUpperCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
+    // Generate actual report content
+    const reportContent = generateReportContent(reportType);
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `PCA-${reportType.toUpperCase()}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const generateReportContent = (reportType) => {
+    const reportData = {
+      executive: {
+        title: 'PCA Executive Summary Report',
+        sections: [
+          'AUDIT OVERVIEW',
+          'Total Declarations Processed: 45,829',
+          'Violations Detected: 1,247',
+          'Risk Score: 72.6%',
+          'Recovery Amount: $2,847,392',
+          '',
+          'KEY FINDINGS',
+          '• Value under-declaration remains the primary violation type',
+          '• HS Code misclassification increased by 8% this period',
+          '• Cross-border smuggling patterns detected in 3 regions',
+          '• AI model accuracy improved to 94.2%',
+          '',
+          'RECOMMENDATIONS',
+          '• Enhanced screening for high-risk origin countries',
+          '• Implementation of advanced HS Code verification',
+          '• Increased frequency of random inspections'
+        ]
+      },
+      detailed: {
+        title: 'PCA Detailed Violations Report',
+        sections: [
+          'DETAILED VIOLATION ANALYSIS',
+          'Period: ' + (executionConfig.period === 'custom' ? `${executionConfig.customRange.start} to ${executionConfig.customRange.end}` : executionConfig.period),
+          'Countries: ' + executionConfig.countries.join(', '),
+          '',
+          'VIOLATION BREAKDOWN',
+          '1. Value Under-declaration: 342 cases (+12%)',
+          '2. HS Code Misclassification: 256 cases (+8%)',
+          '3. False Declarations: 189 cases (-3%)',
+          '4. Documentation Errors: 167 cases (+15%)',
+          '5. Origin Fraud: 145 cases (+5%)',
+          '6. Weight Discrepancies: 148 cases (-2%)',
+          '',
+          'HIGH-RISK SHIPMENTS',
+          '• 15 shipments with risk score > 90%',
+          '• 8 shipments involving sanctioned entities',
+          '• 23 shipments with unusual routing patterns'
+        ]
+      },
+      declarant: {
+        title: 'PCA Declarant Communications Report',
+        sections: [
+          'NOTICES AND REQUIRED ACTIONS',
+          '',
+          'URGENT - IMMEDIATE ACTION REQUIRED',
+          'The following declarants have 72 hours to respond:',
+          '',
+          'HIGH PRIORITY VIOLATIONS:',
+          '1. ABC Trading Ltd - Case #2025-0892',
+          '   Violation: Value under-declaration of $125,000',
+          '   Action: Submit revised valuation and supporting documents',
+          '   Deadline: November 25, 2025',
+          '',
+          '2. Global Imports Inc - Case #2025-0893',
+          '   Violation: False origin declaration',
+          '   Action: Provide authentic certificates of origin',
+          '   Deadline: November 25, 2025',
+          '',
+          'STANDARD COMPLIANCE NOTICES:',
+          '• 45 declarants requiring additional documentation',
+          '• 23 declarants selected for random audit',
+          '• 8 declarants with compliance warnings'
+        ]
+      },
+      statistical: {
+        title: 'PCA Statistical Analysis Report',
+        sections: [
+          'STATISTICAL TRENDS AND PATTERNS',
+          'Analysis Period: ' + (executionConfig.period === 'custom' ? `${executionConfig.customRange.start} to ${executionConfig.customRange.end}` : executionConfig.period),
+          '',
+          'TREND ANALYSIS:',
+          '• Violation trend: +12.5% (increasing)',
+          '• Risk score trend: +8.3% (elevated risk)',
+          '• Recovery trend: +15.7% (improved collection)',
+          '',
+          'COUNTRY-SPECIFIC ANALYSIS:',
+          '🇬🇭 Ghana: 342 violations, 68.4% risk score',
+          '🇳🇬 Nigeria: 567 violations, 78.9% risk score',
+          '🇰🇪 Kenya: 189 violations, 64.2% risk score',
+          '🇨🇳 China: 149 violations, 58.7% risk score',
+          '',
+          'PREDICTIVE INDICATORS:',
+          '• Expected increase in violation attempts: +18%',
+          '• Emerging risk routes: West Africa to Europe',
+          '• High-risk commodities: Electronics, textiles, machinery'
+        ]
+      },
+      compliance: {
+        title: 'PCA Compliance Certificate',
+        sections: [
+          'OFFICIAL COMPLIANCE CERTIFICATION',
+          '',
+          'CERTIFICATE #: PCA-COMP-2025-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          'DATE: ' + new Date().toLocaleDateString(),
+          'PERIOD: ' + (executionConfig.period === 'custom' ? `${executionConfig.customRange.start} to ${executionConfig.customRange.end}` : executionConfig.period),
+          '',
+          'COMPLIANCE STATUS: ACCEPTABLE',
+          '',
+          'KEY METRICS:',
+          '✓ Overall compliance rate: 97.3%',
+          '✓ Risk mitigation effectiveness: 89.1%',
+          '✓ Audit coverage: 94.7%',
+          '✓ Recovery rate: 87.2%',
+          '',
+          'RECOMMENDATIONS FOR NEXT PERIOD:',
+          '• Maintain current detection parameters',
+          '• Focus on high-risk commodity categories',
+          '• Continue cross-border intelligence sharing',
+          '',
+          'CERTIFIED BY:',
+          '_______________________________',
+          'PCA Compliance Authority',
+          'Accredited Customs Administration'
+        ]
+      }
+    };
+    
+    return reportData[reportType] ? 
+      reportData[reportType].sections.join('\n') : 
+      'Report type not found';
   };
 
   const handleRetrieveHistoricalReport = (pcaId) => {
-    alert(`Retrieving historical report: ${pcaId}\n\nThis would open the detailed report viewer with:\n- Complete violation analysis\n- Evidence documentation\n- Compliance certificates\n- Audit trail\n- Export options`);
+    const audit = pcaHistory.find(a => a.id === pcaId);
+    setSelectedHistoricalReport(audit);
+    setReportViewerOpen(true);
   };
 
   const handlePreviewPackage = () => {
@@ -890,21 +1031,46 @@ export default function Home() {
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Country Selection */}
               <Card>
                 <CardHeader>
-                  <CardTitle>ICUMS Integration</CardTitle>
-                  <CardDescription>Configure ICUMS database connection</CardDescription>
+                  <CardTitle>Country Configuration</CardTitle>
+                  <CardDescription>Select country to configure its customs system</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country-select">Select Country</Label>
+                    <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GH">🇬🇭 Ghana - ICUMS</SelectItem>
+                        <SelectItem value="NG">🇳🇬 Nigeria - Customs System</SelectItem>
+                        <SelectItem value="KE">🇰🇪 Kenya - Customs System</SelectItem>
+                        <SelectItem value="CN">🇨🇳 China - Customs System</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Connection Status</p>
-                      <p className="text-sm text-muted-foreground">Last sync: 2 minutes ago</p>
+                      <p className="text-sm text-muted-foreground">Last sync: {countryConfigs[selectedCountry].lastSync}</p>
                     </div>
                     <Badge className={countryConfigs[selectedCountry].connected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
                       {countryConfigs[selectedCountry].connected ? "Connected" : "Disconnected"}
                     </Badge>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Selected Country Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{countryConfigs[selectedCountry].name}</CardTitle>
+                  <CardDescription>Configure {selectedCountry === 'GH' ? 'ICUMS' : 'Customs System'} database connection</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="server-url">Server URL</Label>
                     <Input id="server-url" defaultValue={countryConfigs[selectedCountry].serverUrl} />
@@ -913,13 +1079,31 @@ export default function Home() {
                     <Label htmlFor="api-key">API Key</Label>
                     <Input id="api-key" type="password" defaultValue={countryConfigs[selectedCountry].apiKey} />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="sync-frequency">Sync Frequency</Label>
+                    <Select defaultValue="realtime">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="realtime">Real-time</SelectItem>
+                        <SelectItem value="5min">Every 5 minutes</SelectItem>
+                        <SelectItem value="15min">Every 15 minutes</SelectItem>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button variant="outline" className="w-full">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Test Connection
                   </Button>
                 </CardContent>
               </Card>
+            </div>
 
+            {/* Additional Country Settings */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Detection Engine</CardTitle>
@@ -967,9 +1151,192 @@ export default function Home() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Multi-Country Settings</CardTitle>
+                  <CardDescription>Configure multi-jurisdiction analysis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="cross-border">Cross-Border Analysis</Label>
+                      <Switch id="cross-border" defaultChecked />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="data-sharing">Data Sharing Between Countries</Label>
+                      <Switch id="data-sharing" defaultChecked />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="default-countries">Default Analysis Countries</Label>
+                    <div className="space-y-2">
+                      {['GH', 'NG', 'KE', 'CN'].map((country) => (
+                        <div key={country} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`default-${country}`}
+                            defaultChecked={country === 'GH'}
+                            className="rounded"
+                          />
+                          <Label htmlFor={`default-${country}`} className="flex items-center gap-1">
+                            <span>{countryFlags[country]}</span>
+                            <span className="text-sm">{country}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Report Viewer Dialog */}
+        {reportViewerOpen && selectedHistoricalReport && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl max-h-[80vh] overflow-y-auto m-4" id="report-content">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">{selectedHistoricalReport.id} - Detailed Report</h2>
+                  <Button variant="outline" onClick={() => setReportViewerOpen(false)}>
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Audit Date</p>
+                      <p className="font-medium">{selectedHistoricalReport.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Declaration Type</p>
+                      <p className="font-medium uppercase">{selectedHistoricalReport.type}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Violations</p>
+                      <p className="font-medium">{selectedHistoricalReport.violations}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Risk Score</p>
+                      <p className="font-medium">{selectedHistoricalReport.score}%</p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Violation Analysis</h3>
+                    <div className="space-y-3">
+                      <div className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Value Under-declaration</h4>
+                        <p className="text-sm text-muted-foreground">Primary violation type detected in {Math.round(selectedHistoricalReport.violations * 0.35)} cases</p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Average Under-declaration</span>
+                            <span className="font-medium">42.3%</span>
+                          </div>
+                          <Progress value={42.3} className="h-2" />
+                        </div>
+                      </div>
+
+                      <div className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">HS Code Misclassification</h4>
+                        <p className="text-sm text-muted-foreground">Incorrect classification detected in {Math.round(selectedHistoricalReport.violations * 0.25)} cases</p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Detection Rate</span>
+                            <span className="font-medium">87.2%</span>
+                          </div>
+                          <Progress value={87.2} className="h-2" />
+                        </div>
+                      </div>
+
+                      <div className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Documentation Errors</h4>
+                        <p className="text-sm text-muted-foreground">Missing or invalid documents in {Math.round(selectedHistoricalReport.violations * 0.20)} cases</p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Compliance Rate</span>
+                            <span className="font-medium">76.8%</span>
+                          </div>
+                          <Progress value={76.8} className="h-2" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Risk Assessment</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">High Risk Shipments</h4>
+                        <p className="text-2xl font-bold text-red-600">{Math.round(selectedHistoricalReport.violations * 0.15)}</p>
+                        <p className="text-sm text-muted-foreground">Risk score &gt; 80%</p>
+                      </div>
+                      <div className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-2">Recovery Amount</h4>
+                        <p className="text-2xl font-bold text-green-600">${Math.round(selectedHistoricalReport.violations * 28473).toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Estimated total recovery</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Recommendations</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <p className="text-sm">Enhanced screening requirements for high-risk origin countries</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <p className="text-sm">Implementation of advanced HS Code verification system</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <p className="text-sm">Increased frequency of random physical inspections</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                        <p className="text-sm">Enhanced cross-border intelligence sharing</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-6">
+                  <Button onClick={() => {
+                    const content = document.getElementById('report-content').innerText;
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${selectedHistoricalReport.id}-Detailed-Report.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Full Report
+                  </Button>
+                  <Button variant="outline" onClick={() => setReportViewerOpen(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -46,7 +46,37 @@ export default function Home() {
     { id: 'PCA-2025-007', date: '2025-10-10', type: 'import', status: 'completed', violations: 18, score: 79 },
     { id: 'PCA-2025-008', date: '2025-10-05', type: 'transit', status: 'completed', violations: 9, score: 71 }
   ]);
-  const [icumsConnected, setIcumsConnected] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState('GH');
+  const [countryConfigs, setCountryConfigs] = useState({
+    'GH': {
+      name: 'Ghana ICUMS',
+      serverUrl: 'https://icums.gov.gh/api/v2',
+      apiKey: '•••••••••••••••',
+      connected: true,
+      lastSync: '2 minutes ago'
+    },
+    'NG': {
+      name: 'Nigeria Customs System',
+      serverUrl: 'https://customs.gov.ng/api/v2',
+      apiKey: '•••••••••••••••',
+      connected: true,
+      lastSync: '5 minutes ago'
+    },
+    'KE': {
+      name: 'Kenya Customs System',
+      serverUrl: 'https://customs.go.ke/api/v2',
+      apiKey: '•••••••••••••••',
+      connected: false,
+      lastSync: '1 hour ago'
+    },
+    'CN': {
+      name: 'China Customs System',
+      serverUrl: 'https://customs.gov.cn/api/v2',
+      apiKey: '•••••••••••••••',
+      connected: true,
+      lastSync: '10 minutes ago'
+    }
+  });
   const [stats, setStats] = useState({
     totalDeclarations: 45829,
     totalViolations: 1247,
@@ -99,6 +129,13 @@ export default function Home() {
       setTimeout(() => {
         setIsExecuting(false);
         setExecutionProgress(0);
+        
+        // Update the running audit to completed
+        setPcaHistory(prev => prev.map(audit => 
+          audit.status === 'running' 
+            ? { ...audit, status: 'completed' }
+            : audit
+        ));
       }, 2000);
     }
   }, [isExecuting, executionProgress]);
@@ -106,6 +143,20 @@ export default function Home() {
   const handleExecutePCA = () => {
     setIsExecuting(true);
     setExecutionProgress(0);
+    
+    // Create a new audit entry with current date and selected configuration
+    const today = new Date('2025-11-18');
+    const newAudit = {
+      id: `PCA-2025-${String(Math.floor(Math.random() * 900) + 100)}`,
+      date: format(today, 'yyyy-MM-dd'),
+      type: executionConfig.declarationTypes.length === 1 ? executionConfig.declarationTypes[0].toUpperCase() : 'MULTIPLE',
+      status: 'running',
+      violations: Math.floor(Math.random() * 20) + 5,
+      score: Math.floor(Math.random() * 30) + 60
+    };
+    
+    // Add to history
+    setPcaHistory(prev => [newAudit, ...prev.slice(0, 7)]);
   };
 
   const handlePauseExecution = () => {
@@ -121,11 +172,19 @@ export default function Home() {
   };
 
   const handleDownloadReport = (reportType) => {
-    console.log(`Downloading ${reportType} report...`);
+    alert(`Downloading ${reportType} report...\n\nThis would generate and download:\n- ${reportType} report in PDF format\n- Executive summary with key findings\n- Detailed violation analysis\n- Statistical trends and patterns\n- Compliance recommendations\n\nFile: PCA-${reportType.toUpperCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const handleRetrieveHistoricalReport = (pcaId) => {
-    console.log(`Retrieving historical report: ${pcaId}`);
+    alert(`Retrieving historical report: ${pcaId}\n\nThis would open the detailed report viewer with:\n- Complete violation analysis\n- Evidence documentation\n- Compliance certificates\n- Audit trail\n- Export options`);
+  };
+
+  const handlePreviewPackage = () => {
+    alert('Evidence Package Preview\n\nThis would show a preview of the evidence package containing:\n- Declaration documents\n- Supporting documentation\n- AI analysis reports\n- Communication logs\n- Audit trails\n- Photographic evidence\n- Financial records\n- Compliance certificates');
+  };
+
+  const handleGenerateEvidencePackage = () => {
+    alert('Generating Evidence Package...\n\nThis would:\n1. Collect all selected evidence types\n2. Organize documents by category\n3. Generate index and summary\n4. Create secure digital package\n5. Apply encryption and watermarking\n6. Generate download link\n\nPackage would be ready for download in 2-3 minutes.');
   };
 
   const violationTypes = [
@@ -159,9 +218,9 @@ export default function Home() {
             <p className="text-slate-600 dark:text-slate-400 mt-2">Post-Clearance Audit with Artificial Intelligence</p>
           </div>
           <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${icumsConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {icumsConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-              <span className="text-sm font-medium">ICUMS {icumsConnected ? 'Connected' : 'Disconnected'}</span>
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${countryConfigs[selectedCountry].connected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {countryConfigs[selectedCountry].connected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+              <span className="text-sm font-medium">{countryConfigs[selectedCountry].name} {countryConfigs[selectedCountry].connected ? 'Connected' : 'Disconnected'}</span>
             </div>
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
@@ -234,21 +293,27 @@ export default function Home() {
                     <Globe className="h-5 w-5" />
                     Country Breakdown
                   </CardTitle>
+                  <CardDescription>Analysis for selected origin countries</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {Object.entries(stats.countryBreakdown).map(([country, data]) => (
+                    {executionConfig.countries.map((country) => (
                       <div key={country} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{countryFlags[country]}</span>
                           <span className="font-medium">{country}</span>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-medium">{data.declarations.toLocaleString()} declarations</div>
-                          <div className="text-xs text-muted-foreground">{data.violations} violations ({data.riskScore}% risk)</div>
+                          <div className="text-sm font-medium">{stats.countryBreakdown[country]?.declarations?.toLocaleString() || 0} declarations</div>
+                          <div className="text-xs text-muted-foreground">{stats.countryBreakdown[country]?.violations || 0} violations ({stats.countryBreakdown[country]?.riskScore || 0}% risk)</div>
                         </div>
                       </div>
                     ))}
+                    {executionConfig.countries.length === 0 && (
+                      <div className="text-center text-muted-foreground py-4">
+                        <p>No countries selected. Please select origin countries in the PCA Workflow tab.</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -380,7 +445,63 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <Label>Analysis Period</Label>
-                    <Select value={executionConfig.period} onValueChange={(value) => setExecutionConfig({...executionConfig, period: value})}>
+                    <Select value={executionConfig.period} onValueChange={(value) => {
+                      // Calculate date ranges based on selection
+                      const today = new Date('2025-11-18');
+                      let newCustomRange = { ...executionConfig.customRange };
+                      
+                      switch(value) {
+                        case 'last7days':
+                          const last7 = new Date(today);
+                          last7.setDate(today.getDate() - 7);
+                          newCustomRange = { 
+                            start: format(last7, 'yyyy-MM-dd'), 
+                            end: format(today, 'yyyy-MM-dd') 
+                          };
+                          break;
+                        case 'last30days':
+                          const last30 = new Date(today);
+                          last30.setDate(today.getDate() - 30);
+                          newCustomRange = { 
+                            start: format(last30, 'yyyy-MM-dd'), 
+                            end: format(today, 'yyyy-MM-dd') 
+                          };
+                          break;
+                        case 'last90days':
+                          const last90 = new Date(today);
+                          last90.setDate(today.getDate() - 90);
+                          newCustomRange = { 
+                            start: format(last90, 'yyyy-MM-dd'), 
+                            end: format(today, 'yyyy-MM-dd') 
+                          };
+                          break;
+                        case 'ytd':
+                          newCustomRange = { 
+                            start: '2025-01-01', 
+                            end: format(today, 'yyyy-MM-dd') 
+                          };
+                          break;
+                        case 'lastyear':
+                          newCustomRange = { 
+                            start: '2024-01-01', 
+                            end: '2024-12-31' 
+                          };
+                          break;
+                        // 'custom' keeps existing dates
+                      }
+                      
+                      setExecutionConfig({
+                        ...executionConfig, 
+                        period: value,
+                        customRange: newCustomRange
+                      });
+                      
+                      // Update calendar dates if not custom
+                      if (value !== 'custom') {
+                        setStartDate(new Date(newCustomRange.start));
+                        setEndDate(new Date(newCustomRange.end));
+                      }
+                    }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select period" />
                       </SelectTrigger>
@@ -501,29 +622,32 @@ export default function Home() {
                 {/* Country and Declaration Type Selection */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label>Countries</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['GH', 'NG', 'KE', 'CN'].map((country) => (
-                        <div key={country} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`country-${country}`}
-                            checked={executionConfig.countries.includes(country)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setExecutionConfig({...executionConfig, countries: [...executionConfig.countries, country]});
-                              } else {
-                                setExecutionConfig({...executionConfig, countries: executionConfig.countries.filter(c => c !== country)});
-                              }
-                            }}
-                            className="rounded"
-                          />
-                          <Label htmlFor={`country-${country}`} className="flex items-center gap-1">
-                            <span>{countryFlags[country]}</span>
-                            <span className="text-sm">{country}</span>
-                          </Label>
-                        </div>
-                      ))}
+                    <Label>Origin Countries</Label>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Select one or more countries of shipment origin</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['GH', 'NG', 'KE', 'CN'].map((country) => (
+                          <div key={country} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`country-${country}`}
+                              checked={executionConfig.countries.includes(country)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setExecutionConfig({...executionConfig, countries: [...executionConfig.countries, country]});
+                                } else {
+                                  setExecutionConfig({...executionConfig, countries: executionConfig.countries.filter(c => c !== country)});
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <Label htmlFor={`country-${country}`} className="flex items-center gap-1">
+                              <span>{countryFlags[country]}</span>
+                              <span className="text-sm">{country}</span>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -750,11 +874,11 @@ export default function Home() {
                 </div>
 
                 <div className="flex gap-4">
-                  <Button>
+                  <Button onClick={handleGenerateEvidencePackage}>
                     <Download className="h-4 w-4 mr-2" />
                     Generate Evidence Package
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handlePreviewPackage}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Preview Package
                   </Button>
@@ -777,17 +901,17 @@ export default function Home() {
                       <p className="font-medium">Connection Status</p>
                       <p className="text-sm text-muted-foreground">Last sync: 2 minutes ago</p>
                     </div>
-                    <Badge className={icumsConnected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                      {icumsConnected ? "Connected" : "Disconnected"}
+                    <Badge className={countryConfigs[selectedCountry].connected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                      {countryConfigs[selectedCountry].connected ? "Connected" : "Disconnected"}
                     </Badge>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="server-url">Server URL</Label>
-                    <Input id="server-url" defaultValue="https://icums.gov.gh/api/v2" />
+                    <Input id="server-url" defaultValue={countryConfigs[selectedCountry].serverUrl} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="api-key">API Key</Label>
-                    <Input id="api-key" type="password" defaultValue="••••••••••••••••" />
+                    <Input id="api-key" type="password" defaultValue={countryConfigs[selectedCountry].apiKey} />
                   </div>
                   <Button variant="outline" className="w-full">
                     <RefreshCw className="h-4 w-4 mr-2" />

@@ -17,16 +17,153 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  role      String   @default("user") // admin, auditor, user
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Relations
+  auditCases AuditCase[]
+  reports    Report[]
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model AuditCase {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("created") // created, running, completed, failed
+  config      Json     // Audit configuration
+  results     Json?    // Audit results
+  createdAt   DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Relations
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  reports     Report[]
+  
+  @@map("audit_cases")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // executive-summary, detailed-violations, declarant, statistical, compliance
+  content     Json     // Report content
+  generatedAt DateTime @default(now())
+  downloadUrl String?
+  
+  // Relations
+  auditCase   AuditCase @relation(fields: [auditCaseId], references: [id])
+  auditCaseId String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+  
+  @@map("reports")
+}
+
+model Declaration {
+  id              String   @id @default(cuid())
+  declarationId   String   @unique
+  type            String   // import, export, transit
+  hsCode          String
+  description     String
+  originCountry   String
+  destinationCountry String?
+  value           Float
+  currency        String   @default("USD")
+  weight          Float?
+  declarantTin    String
+  declarantName   String
+  portOfEntry     String
+  date            DateTime
+  status          String   @default("pending") // pending, approved, rejected, flagged
+  
+  // Ghana-specific fields
+  getFundLevy     Float?
+  nhilLevy        Float?
+  covidLevy       Float?
+  vatRate         Float    @default(15.0)
+  ecowasOrigin    Boolean  @default(false)
+  atgApplicable   Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  violations      Violation[]
+  evidences       Evidence[]
+  
+  @@map("declarations")
+}
+
+model Violation {
+  id            String   @id @default(cuid())
+  type          String   // value-under-declaration, hs-misclassification, origin-fraud, etc.
+  severity      String   // low, medium, high, critical
+  description   String
+  riskScore     Float
+  recoveryAmount Float?
+  
+  // Ghana-specific fields
+  ghanaTaxImpact Float?
+  sector        String? // petroleum, textiles, vehicles
+  
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  declaration   Declaration @relation(fields: [declarationId], references: [id])
+  declarationId String
+  
+  @@map("violations")
+}
+
+model Evidence {
+  id           String   @id @default(cuid())
+  type         String   // document, image, certificate, etc.
+  name         String
+  path         String
+  isValid      Boolean  @default(false)
+  validationScore Float?
+  notes        String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  declaration  Declaration @relation(fields: [declarationId], references: [id])
+  declarationId String
+  
+  @@map("evidences")
+}
+
+model RulePack {
+  id          String   @id @default(cuid())
+  name        String
+  version     String
+  description String?
+  isActive    Boolean  @default(true)
+  
+  // Ghana-specific fields
+  focusAreas  Json     // petroleum, textiles, vehicles
+  riskLevels  Json     // low, medium, high configurations
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("rule_packs")
+}
+
+model AuditAgent {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // ecowas-origin, petroleum-atg, tax-compliance, tsa-reconciliation
+  description String?
+  accuracy    Float    @default(0.0)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("audit_agents")
 }

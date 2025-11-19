@@ -13,32 +13,15 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarIcon, Play, Pause, RotateCcw, Download, Upload, Settings, AlertTriangle, CheckCircle, Clock, TrendingUp, FileText, Activity, Globe, Shield, Eye, BarChart3, Users, Target, Zap, Database, Wifi, WifiOff, RefreshCw, Search, Filter, ChevronRight, AlertCircle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [executionConfig, setExecutionConfig] = useState({
-    period: 'custom', // Changed to custom by default
-    customRange: { start: '2025-09-18', end: '2025-11-18' }, // Updated to current date
-    riskThreshold: 70,
-    useAdvancedFilters: true,
-    countries: ['GH', 'NG', 'KE', 'CN'],
-    declarationTypes: ['import', 'export', 'transit'],
-    hsCodes: [],
-    valueRange: { min: 0, max: 1000000 },
-    auditFrequency: 'weekly',
-    deepAnalysis: true,
-    historicalComparison: true
-  });
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [executionProgress, setExecutionProgress] = useState(0);
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [selectedHistoricalReport, setSelectedHistoricalReport] = useState(null);
+  const [isExecuting, setIsExecuting] = useState(false)
+  const [executionProgress, setExecutionProgress] = useState(0)
   
-  // Enhanced Audit Case Management
+  // Ghana PCA System Data
   const [auditCases, setAuditCases] = useState([
     {
       id: 'CASE-2025-001',
@@ -48,21 +31,23 @@ export default function Home() {
       createdAt: '2025-11-15T10:00:00Z',
       startedAt: '2025-11-15T10:30:00Z',
       completedAt: '2025-11-15T14:45:00Z',
-      config: {
-        scope: 'hs-codes',
-        targetFilters: {
-          hsCodes: ['27101990', '27090010', '27111200'],
-          dateRange: { start: '2025-10-01', end: '2025-11-30' },
-          countries: ['GH'],
-          riskThreshold: 70
-        }
-      },
       results: {
         totalDeclarations: 1247,
         violationsDetected: 89,
         riskScore: 76.4,
         recoveryAmount: 2847392,
-        accuracy: 94.2
+        accuracy: 94.2,
+        sectoralImpact: {
+          petroleum: { violations: 45, recovery: 1708435 },
+          textiles: { violations: 28, recovery: 683374 },
+          vehicles: { violations: 16, recovery: 455583 }
+        },
+        violationBreakdown: {
+          'value-under-declaration': 34,
+          'hs-misclassification': 22,
+          'origin-fraud': 18,
+          'documentation-errors': 15
+        }
       }
     },
     {
@@ -73,13 +58,6 @@ export default function Home() {
       createdAt: '2025-11-18T09:00:00Z',
       startedAt: '2025-11-18T09:15:00Z',
       completedAt: null,
-      config: {
-        scope: 'shipments',
-        targetFilters: {
-          shipmentIds: ['BL-2025-0892', 'BL-2025-0893', 'BL-2025-0894'],
-          riskThreshold: 85
-        }
-      },
       results: null
     }
   ]);
@@ -91,7 +69,17 @@ export default function Home() {
       type: 'executive-summary',
       name: 'Executive Summary Report',
       generatedAt: '2025-11-15T15:00:00Z',
-      downloadUrl: '#'
+      downloadUrl: '#',
+      content: {
+        totalViolations: 89,
+        recoveryAmount: 2847392,
+        accuracy: 94.2,
+        sectoralBreakdown: {
+          petroleum: { violations: 45, recovery: 1708435 },
+          textiles: { violations: 28, recovery: 683374 },
+          vehicles: { violations: 16, recovery: 455583 }
+        }
+      }
     },
     {
       id: 'REPORT-2025-002',
@@ -99,53 +87,68 @@ export default function Home() {
       type: 'detailed-violations',
       name: 'Detailed Violations Analysis',
       generatedAt: '2025-11-15T15:30:00Z',
-      downloadUrl: '#'
+      downloadUrl: '#',
+      content: {
+        violationCategories: {
+          'value-under-declaration': { count: 34, percentage: 38.2 },
+          'hs-misclassification': { count: 22, percentage: 24.7 },
+          'origin-fraud': { count: 18, percentage: 20.2 },
+          'documentation-errors': { count: 15, percentage: 16.9 }
+        },
+        highRiskCases: 27,
+        criticalViolations: 9
+      }
+    },
+    {
+      id: 'REPORT-2025-003',
+      caseId: 'CASE-2025-001',
+      type: 'declarant-communications',
+      name: 'Declarant Communications Package',
+      generatedAt: '2025-11-15T16:00:00Z',
+      downloadUrl: '#',
+      content: {
+        totalDeclarants: 67,
+        noticesSent: 89,
+        responsesReceived: 45,
+        pendingActions: 22
+      }
+    },
+    {
+      id: 'REPORT-2025-004',
+      caseId: 'CASE-2025-001',
+      type: 'statistical-analysis',
+      name: 'Statistical Analysis Report',
+      generatedAt: '2025-11-15T16:30:00Z',
+      downloadUrl: '#',
+      content: {
+        trends: {
+          violations: '+12.5%',
+          riskScore: '+8.3%',
+          recovery: '+15.7%'
+        },
+        patterns: {
+          peakViolationHours: ['14:00-16:00', '09:00-11:00'],
+          highRiskHS: ['2710', '5201', '8703'],
+          commonOrigins: ['CN', 'NG', 'US']
+        }
+      }
+    },
+    {
+      id: 'REPORT-2025-005',
+      caseId: 'CASE-2025-001',
+      type: 'compliance-certificate',
+      name: 'Compliance Certificate',
+      generatedAt: '2025-11-15T17:00:00Z',
+      downloadUrl: '#',
+      content: {
+        complianceScore: 85.7,
+        grade: 'A-',
+        recommendations: 12,
+        nextAuditDate: '2025-12-15'
+      }
     }
   ]);
 
-  const [showNewCaseForm, setShowNewCaseForm] = useState(false);
-  const [selectedAuditCase, setSelectedAuditCase] = useState(null);
-  const [pcaHistory, setPcaHistory] = useState([
-    { id: 'PCA-2025-001', date: '2025-11-15', type: 'transit', status: 'completed', violations: 12, score: 85 },
-    { id: 'PCA-2025-002', date: '2025-11-10', type: 'import', status: 'completed', violations: 8, score: 72 },
-    { id: 'PCA-2025-003', date: '2025-11-05', type: 'export', status: 'completed', violations: 15, score: 91 },
-    { id: 'PCA-2025-004', date: '2025-10-28', type: 'import', status: 'completed', violations: 6, score: 68 },
-    { id: 'PCA-2025-005', date: '2025-10-20', type: 'transit', status: 'completed', violations: 22, score: 88 },
-    { id: 'PCA-2025-006', date: '2025-10-15', type: 'export', status: 'completed', violations: 5, score: 64 },
-    { id: 'PCA-2025-007', date: '2025-10-10', type: 'import', status: 'completed', violations: 18, score: 79 },
-    { id: 'PCA-2025-008', date: '2025-10-05', type: 'transit', status: 'completed', violations: 9, score: 71 }
-  ]);
-  const [selectedCountry, setSelectedCountry] = useState('GH');
-  const [countryConfigs, setCountryConfigs] = useState({
-    'GH': {
-      name: 'Ghana ICUMS',
-      serverUrl: 'https://icums.gov.gh/api/v2',
-      apiKey: '•••••••••••••••',
-      connected: true,
-      lastSync: '2 minutes ago'
-    },
-    'NG': {
-      name: 'Nigeria Customs System',
-      serverUrl: 'https://customs.gov.ng/api/v2',
-      apiKey: '•••••••••••••••',
-      connected: true,
-      lastSync: '5 minutes ago'
-    },
-    'KE': {
-      name: 'Kenya Customs System',
-      serverUrl: 'https://customs.go.ke/api/v2',
-      apiKey: '•••••••••••••••',
-      connected: false,
-      lastSync: '1 hour ago'
-    },
-    'CN': {
-      name: 'China Customs System',
-      serverUrl: 'https://customs.gov.cn/api/v2',
-      apiKey: '•••••••••••••••',
-      connected: true,
-      lastSync: '10 minutes ago'
-    }
-  });
   const [stats, setStats] = useState({
     totalDeclarations: 45829,
     totalViolations: 1247,
@@ -164,6 +167,7 @@ export default function Home() {
     processingQueue: 127,
     averageProcessingTime: 4.7
   });
+
   const [recentActivity, setRecentActivity] = useState([
     { id: 1, type: 'violation', description: 'High-risk shipment detected from Ghana', time: '2 minutes ago', risk: 94 },
     { id: 2, type: 'audit', description: 'PCA audit completed for 150 shipments', time: '15 minutes ago', risk: null },
@@ -175,19 +179,6 @@ export default function Home() {
     { id: 8, type: 'alert', description: 'New sanction list updates applied', time: '1 day ago', risk: null }
   ]);
 
-  // Date picker states
-  const [showStartCalendar, setShowStartCalendar] = useState(false);
-  const [showEndCalendar, setShowEndCalendar] = useState(false);
-  const [startDate, setStartDate] = useState(new Date('2025-09-18'));
-  const [endDate, setEndDate] = useState(new Date('2025-11-18'));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIcumsConnected(prev => Math.random() > 0.1);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     if (isExecuting && executionProgress < 100) {
       const timer = setTimeout(() => {
@@ -198,13 +189,6 @@ export default function Home() {
       setTimeout(() => {
         setIsExecuting(false);
         setExecutionProgress(0);
-        
-        // Update the running audit to completed
-        setPcaHistory(prev => prev.map(audit => 
-          audit.status === 'running' 
-            ? { ...audit, status: 'completed' }
-            : audit
-        ));
       }, 2000);
     }
   }, [isExecuting, executionProgress]);
@@ -212,136 +196,10 @@ export default function Home() {
   const handleExecutePCA = () => {
     setIsExecuting(true);
     setExecutionProgress(0);
-    
-    // Create a new audit entry with current date and selected configuration
-    const today = new Date('2025-11-18');
-    const newAudit = {
-      id: `PCA-2025-${String(Math.floor(Math.random() * 900) + 100)}`,
-      date: format(today, 'yyyy-MM-dd'),
-      type: executionConfig.declarationTypes.length === 1 ? executionConfig.declarationTypes[0].toUpperCase() : 'MULTIPLE',
-      status: 'running',
-      violations: Math.floor(Math.random() * 20) + 5,
-      score: Math.floor(Math.random() * 30) + 60
-    };
-    
-    // Add to history
-    setPcaHistory(prev => [newAudit, ...prev.slice(0, 7)]);
   };
 
   const handlePauseExecution = () => {
     setIsExecuting(false);
-  };
-
-  const handleResumeExecution = () => {
-    setIsExecuting(true);
-  };
-
-  const handleReportSelect = (reportType) => {
-    setSelectedReport(reportType);
-  };
-
-  const generateReportContent = (auditCase, reportType) => {
-    const results = auditCase.results;
-    
-    const reportTemplates = {
-      'executive-summary': `
-EXECUTIVE SUMMARY REPORT
-========================
-Audit Case: ${auditCase.name}
-Case ID: ${auditCase.id}
-Execution Period: ${auditCase.startedAt} to ${auditCase.completedAt}
-
-KEY PERFORMANCE INDICATORS
-- Total Declarations Processed: ${results.totalDeclarations.toLocaleString()}
-- Violations Detected: ${results.violationsDetected.toLocaleString()}
-- Risk Score: ${results.riskScore}%
-- Estimated Recovery: GHS ${results.recoveryAmount.toLocaleString()}
-- Detection Accuracy: ${(results.accuracy * 100).toFixed(1)}%
-
-SECTORAL IMPACT
-- Petroleum Sector: GHS ${results.sectoralImpact.petroleum.recovery.toLocaleString()} recovered
-- Textiles Sector: GHS ${results.sectoralImpact.textiles.recovery.toLocaleString()} recovered
-- Vehicles Sector: GHS ${results.sectoralImpact.vehicles.recovery.toLocaleString()} recovered
-
-VIOLATION BREAKDOWN
-${Object.entries(results.violationBreakdown).map(([type, count]) => 
-  `- ${type}: ${count} cases`
-).join('\n')}
-      `,
-      
-      'detailed-violations': `
-DETAILED VIOLATIONS REPORT
-==========================
-Audit Case: ${auditCase.name} (${auditCase.id})
-Analysis Period: ${auditCase.config.targetFilters.dateRange.start} to ${auditCase.config.targetFilters.dateRange.end}
-
-VIOLATION CATEGORIES
-${Object.entries(results.violationBreakdown).map(([type, count], index) => 
-  `${index + 1}. ${type}: ${count} cases (${((count/results.violationsDetected) * 100).toFixed(1)}%)`
-).join('\n')}
-
-HIGH-RISK FINDINGS
-- Total High-Risk Cases: ${Math.floor(results.violationsDetected * 0.3)}
-- Critical Violations: ${Math.floor(results.violationsDetected * 0.1)}
-- Recommended Actions: Immediate audit required for critical cases
-
-SECTORAL ANALYSIS
-${Object.entries(results.sectoralImpact).map(([sector, data]) => 
-  `${sector.charAt(0).toUpperCase() + sector.slice(1)}: ${data.violations} violations, GHS ${data.recovery.toLocaleString()} recovery`
-).join('\n')}
-      `
-    };
-
-    return reportTemplates[reportType] || 'Report type not found';
-  };
-
-  const handleGenerateReport = (auditCaseId, reportType) => {
-    const auditCase = auditCases.find(c => c.id === auditCaseId);
-    if (!auditCase || auditCase.status !== 'completed') {
-      alert('Audit must be completed before generating reports');
-      return;
-    }
-
-    const report = {
-      id: `REPORT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-      caseId: auditCaseId,
-      type: reportType,
-      name: `${reportType.charAt(0).toUpperCase() + reportType.slice(1).replace('-', ' ')} Report`,
-      generatedAt: new Date().toISOString(),
-      downloadUrl: '#'
-    };
-
-    setAuditReports(prev => [report, ...prev]);
-    
-    // Simulate report generation
-    setTimeout(() => {
-      const reportContent = generateReportContent(auditCase, reportType);
-      const blob = new Blob([reportContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${auditCase.name.replace(/\s+/g, '_')}_${reportType}_${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 1000);
-  };
-
-  const handleDownloadReport = (reportType) => {
-    alert(`Downloading ${reportType} report...\n\nThis would generate and download:\n- ${reportType} report in PDF format\n- Executive summary with key findings\n- Detailed violation analysis\n- Statistical trends and patterns\n- Compliance recommendations\n\nFile: PCA-${reportType.toUpperCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
-  };
-
-  const handleRetrieveHistoricalReport = (pcaId) => {
-    alert(`Retrieving historical report: ${pcaId}\n\nThis would open the detailed report viewer with:\n- Complete violation analysis\n- Evidence documentation\n- Compliance certificates\n- Audit trail\n- Export options`);
-  };
-
-  const handlePreviewPackage = () => {
-    alert('Evidence Package Preview\n\nThis would show a preview of the evidence package containing:\n- Declaration documents\n- Supporting documentation\n- AI analysis reports\n- Communication logs\n- Audit trails\n- Photographic evidence\n- Financial records\n- Compliance certificates');
-  };
-
-  const handleGenerateEvidencePackage = () => {
-    alert('Generating Evidence Package...\n\nThis would:\n1. Collect all selected evidence types\n2. Organize documents by category\n3. Generate index and summary\n4. Create secure digital package\n5. Apply encryption and watermarking\n6. Generate download link\n\nPackage would be ready for download in 2-3 minutes.');
   };
 
   const violationTypes = [
@@ -365,144 +223,312 @@ ${Object.entries(results.sectoralImpact).map(([sector, data]) =>
     'GH': '🇬🇭', 'NG': '🇳🇬', 'KE': '🇰🇪', 'CN': '🇨🇳'
   };
 
+  const handleGenerateReport = (reportType) => {
+    const completedCase = auditCases.find(c => c.status === 'completed');
+    if (!completedCase) {
+      alert('Please complete an audit case first before generating reports');
+      return;
+    }
+
+    const newReport = {
+      id: `REPORT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      caseId: completedCase.id,
+      type: reportType,
+      name: reportTypes.find(r => r.id === reportType)?.name || `${reportType} Report`,
+      generatedAt: new Date().toISOString(),
+      downloadUrl: '#',
+      content: generateReportContent(completedCase, reportType)
+    };
+
+    setAuditReports(prev => [newReport, ...prev]);
+    
+    // Simulate report download
+    setTimeout(() => {
+      const reportContent = generateReportContent(completedCase, reportType);
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${completedCase.name.replace(/\s+/g, '_')}_${reportType}_${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
+  };
+
+  const generateReportContent = (auditCase, reportType) => {
+    const results = auditCase.results;
+    
+    const reportTemplates = {
+      'executive': `
+EXECUTIVE SUMMARY REPORT
+========================
+Audit Case: ${auditCase.name}
+Case ID: ${auditCase.id}
+Execution Period: ${auditCase.startedAt} to ${auditCase.completedAt}
+
+KEY PERFORMANCE INDICATORS
+- Total Declarations Processed: ${results.totalDeclarations.toLocaleString()}
+- Violations Detected: ${results.violationsDetected.toLocaleString()}
+- Risk Score: ${results.riskScore}%
+- Estimated Recovery: GHS ${results.recoveryAmount.toLocaleString()}
+- Detection Accuracy: ${results.accuracy}%
+
+SECTORAL IMPACT
+${results.sectoralImpact ? Object.entries(results.sectoralImpact).map(([sector, data]) => 
+  `- ${sector.charAt(0).toUpperCase() + sector.slice(1)}: ${data.violations} violations, GHS ${data.recovery.toLocaleString()} recovered`
+).join('\n') : ''}
+
+VIOLATION BREAKDOWN
+${results.violationBreakdown ? Object.entries(results.violationBreakdown).map(([type, count]) => 
+  `- ${type}: ${count} cases`
+).join('\n') : ''}
+      `,
+      
+      'detailed': `
+DETAILED VIOLATIONS REPORT
+==========================
+Audit Case: ${auditCase.name} (${auditCase.id})
+Analysis Period: ${auditCase.startedAt} to ${auditCase.completedAt}
+
+VIOLATION CATEGORIES
+${results.violationBreakdown ? Object.entries(results.violationBreakdown).map(([type, count], index) => 
+  `${index + 1}. ${type}: ${count} cases (${((count/results.violationsDetected) * 100).toFixed(1)}%)`
+).join('\n') : ''}
+
+HIGH-RISK FINDINGS
+- Total High-Risk Cases: ${Math.floor(results.violationsDetected * 0.3)}
+- Critical Violations: ${Math.floor(results.violationsDetected * 0.1)}
+- Recommended Actions: Immediate audit required for critical cases
+
+SECTORAL ANALYSIS
+${results.sectoralImpact ? Object.entries(results.sectoralImpact).map(([sector, data]) => 
+  `${sector.charAt(0).toUpperCase() + sector.slice(1)}: ${data.violations} violations, GHS ${data.recovery.toLocaleString()} recovery`
+).join('\n') : ''}
+      `,
+      
+      'declarant': `
+DECLARANT COMMUNICATIONS PACKAGE
+================================
+Audit Case: ${auditCase.name} (${auditCase.id})
+Generated: ${new Date().toLocaleDateString()}
+
+SUMMARY
+- Total Declarants Notified: ${Math.floor(results.violationsDetected * 0.8)}
+- Notices Sent: ${results.violationsDetected}
+- Responses Required: ${Math.floor(results.violationsDetected * 0.6)}
+- Pending Actions: ${Math.floor(results.violationsDetected * 0.4)}
+
+NOTICE TYPES
+1. Compliance Violation Notice
+2. Additional Documentation Request
+3. Payment Demand Notice
+4. Investigation Notice
+
+NEXT STEPS
+- Follow up on non-responsive declarants
+- Schedule compliance meetings
+- Prepare enforcement actions for critical cases
+      `,
+      
+      'statistical': `
+STATISTICAL ANALYSIS REPORT
+===========================
+Audit Case: ${auditCase.name} (${auditCase.id})
+Analysis Period: ${auditCase.startedAt} to ${auditCase.completedAt}
+
+VIOLATION TRENDS
+- Value Under-declaration: ${Math.floor(results.violationsDetected * 0.4)} cases (38.2%)
+- HS Code Misclassification: ${Math.floor(results.violationsDetected * 0.25)} cases (24.7%)
+- Origin Fraud: ${Math.floor(results.violationsDetected * 0.2)} cases (20.2%)
+- Documentation Errors: ${Math.floor(results.violationsDetected * 0.15)} cases (16.9%)
+
+RISK PATTERNS
+- Peak Violation Hours: 14:00-16:00, 09:00-11:00
+- High-Risk HS Codes: 2710, 5201, 8703
+- Common Origin Countries: CN, NG, US
+
+RECOMMENDATIONS
+- Enhanced monitoring during peak hours
+- Targeted inspections for high-risk HS codes
+- Increased verification for specific origin countries
+      `,
+      
+      'compliance': `
+COMPLIANCE CERTIFICATE
+=======================
+Audit Case: ${auditCase.name} (${auditCase.id})
+Certificate Date: ${new Date().toLocaleDateString()}
+
+COMPLIANCE SCORE: ${(results.accuracy * 0.9).toFixed(1)}%
+GRADE: ${results.accuracy >= 95 ? 'A' : results.accuracy >= 85 ? 'B' : results.accuracy >= 75 ? 'C' : 'D'}
+
+KEY METRICS
+- Total Declarations: ${results.totalDeclarations.toLocaleString()}
+- Compliant Declarations: ${Math.floor(results.totalDeclarations * (results.accuracy / 100))}
+- Non-Compliant Declarations: ${results.violationsDetected}
+- Recovery Potential: GHS ${results.recoveryAmount.toLocaleString()}
+
+RECOMMENDATIONS
+1. Implement enhanced training for compliance officers
+2. Strengthen pre-arrival assessment procedures
+3. Improve documentation verification processes
+4. Enhance risk-based targeting systems
+
+NEXT AUDIT RECOMMENDED: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+      `
+    };
+
+    return reportTemplates[reportType] || 'Report type not found';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">PCA-AI Platform</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Post-Clearance Audit with Artificial Intelligence</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">🇬🇭 Ghana PCA AI System</h1>
+            <p className="text-slate-600 dark:text-slate-300">Enhanced Customs Audit with AI-Powered Detection for Ghana Revenue Authority</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${countryConfigs[selectedCountry].connected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {countryConfigs[selectedCountry].connected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-              <span className="text-sm font-medium">{countryConfigs[selectedCountry].name} {countryConfigs[selectedCountry].connected ? 'Connected' : 'Disconnected'}</span>
-            </div>
+          <div className="flex items-center space-x-4">
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Wifi className="w-4 h-4" />
+              ICUMS Connected
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Ghana Customs
+            </Badge>
             <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Declarations</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalDeclarations.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">+{stats.weeklyDeclarations} this week</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Violations Detected</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalViolations.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">+{stats.weeklyViolations} this week</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recovery Amount</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">GHS {stats.recoveryAmount.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">+{stats.monthlyTrend.recovery}% this month</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Average Risk Score</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.riskScore}%</div>
+              <p className="text-xs text-muted-foreground">+{stats.monthlyTrend.riskScore}% this month</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="detection">Detection</TabsTrigger>
-            <TabsTrigger value="workflow">PCA Workflow</TabsTrigger>
             <TabsTrigger value="audit-cases">Audit Cases</TabsTrigger>
-            <TabsTrigger value="case-reports">Case Reports</TabsTrigger>
+            <TabsTrigger value="execution">Execution</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="evidence">Evidence Export</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Declarations</CardTitle>
-                  <Database className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalDeclarations.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">+{stats.weeklyDeclarations} this week</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Violations Detected</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalViolations.toLocaleString()}</div>
-                  <p className="text-xs text-muted-foreground">+{stats.weeklyViolations} this week</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Risk Score</CardTitle>
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.riskScore}%</div>
-                  <p className="text-xs text-muted-foreground">+{stats.monthlyTrend.riskScore}% monthly</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Recovery Amount</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${(stats.recoveryAmount / 1000000).toFixed(1)}M</div>
-                  <p className="text-xs text-muted-foreground">+{stats.monthlyTrend.recovery}% monthly</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Country Breakdown & Recent Activity */}
+          <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Ghana System Status */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Country Breakdown
-                  </CardTitle>
-                  <CardDescription>Analysis for selected origin countries</CardDescription>
+                  <CardTitle>🇬🇭 Ghana System Status</CardTitle>
+                  <CardDescription>Real-time Ghana customs audit system monitoring</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {executionConfig.countries.map((country) => (
-                      <div key={country} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{countryFlags[country]}</span>
-                          <span className="font-medium">{country}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">{stats.countryBreakdown[country]?.declarations?.toLocaleString() || 0} declarations</div>
-                          <div className="text-xs text-muted-foreground">{stats.countryBreakdown[country]?.violations || 0} violations ({stats.countryBreakdown[country]?.riskScore || 0}% risk)</div>
-                        </div>
-                      </div>
-                    ))}
-                    {executionConfig.countries.length === 0 && (
-                      <div className="text-center text-muted-foreground py-4">
-                        <p>No countries selected. Please select origin countries in the PCA Workflow tab.</p>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">ICUMS Integration</span>
+                      <Badge variant="outline" className="flex items-center gap-2">
+                        <Wifi className="w-4 h-4" />
+                        Connected
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">GRA Processing</span>
+                      <Badge variant="outline" className="flex items-center gap-2">
+                        <Activity className="w-4 h-4" />
+                        Active
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">AI Agents</span>
+                      <Badge variant="outline" className="flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        4 Active
+                      </Badge>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Recent Ghana Activity */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Recent Activity
-                  </CardTitle>
+                  <CardTitle>Recent Ghana Activity</CardTitle>
+                  <CardDescription>Latest audit events and alerts</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-64">
-                    <div className="space-y-3">
+                  <ScrollArea className="h-80">
+                    <div className="space-y-4">
                       {recentActivity.map((activity) => (
-                        <div key={activity.id} className="flex items-start gap-3">
-                          <div className={`mt-0.5 ${activity.type === 'violation' ? 'text-red-500' : activity.type === 'alert' ? 'text-yellow-500' : activity.type === 'audit' ? 'text-blue-500' : activity.type === 'system' ? 'text-green-500' : 'text-gray-500'}`}>
-                            {activity.type === 'violation' ? <AlertTriangle className="h-4 w-4" /> : activity.type === 'alert' ? <AlertCircle className="h-4 w-4" /> : activity.type === 'audit' ? <Eye className="h-4 w-4" /> : activity.type === 'system' ? <CheckCircle className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                        <div key={activity.id} className="flex items-start space-x-3">
+                          <div className="mt-1">
+                            {activity.type === 'violation' && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                            {activity.type === 'audit' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                            {activity.type === 'alert' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
+                            {activity.type === 'report' && <FileText className="w-4 h-4 text-blue-500" />}
+                            {activity.type === 'system' && <Settings className="w-4 h-4 text-gray-500" />}
                           </div>
-                          <div className="flex-1 space-y-1">
-                            <p className="text-sm">{activity.description}</p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">{activity.time}</span>
-                              {activity.risk && (
-                                <Badge variant={activity.risk > 80 ? 'destructive' : activity.risk > 60 ? 'secondary' : 'outline'}>
-                                  Risk: {activity.risk}
-                                </Badge>
-                              )}
-                            </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{activity.description}</p>
+                            <p className="text-xs text-muted-foreground">{activity.time}</p>
                           </div>
+                          {activity.risk && (
+                            <Badge variant={activity.risk > 80 ? 'destructive' : activity.risk > 60 ? 'default' : 'secondary'}>
+                              {activity.risk}% Risk
+                            </Badge>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -510,32 +536,32 @@ ${Object.entries(results.sectoralImpact).map(([sector, data]) =>
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
 
-          {/* Detection Tab */}
-          <TabsContent value="detection" className="space-y-6">
+            {/* Ghana-Specific Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Violation Types */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Violation Types
-                  </CardTitle>
-                  <CardDescription>Detection patterns and trends</CardDescription>
+                  <CardTitle>Ghana Violation Types</CardTitle>
+                  <CardDescription>Types of violations detected by AI system</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {violationTypes.map((violation) => (
-                      <div key={violation.name} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium">{violation.name}</h4>
-                          <p className="text-sm text-muted-foreground">{violation.count} cases</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={violation.risk === 'high' ? 'destructive' : violation.risk === 'medium' ? 'secondary' : 'outline'}>
-                            {violation.risk} risk
-                          </Badge>
-                          <p className="text-sm text-muted-foreground mt-1">{violation.trend}</p>
+                    {violationTypes.map((violation, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">{violation.name}</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-muted-foreground">{violation.count}</span>
+                              <Badge variant={violation.trend.startsWith('+') ? 'default' : 'secondary'}>
+                                {violation.trend}
+                              </Badge>
+                              <Badge variant={violation.risk === 'high' ? 'destructive' : violation.risk === 'medium' ? 'default' : 'secondary'}>
+                                {violation.risk}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -543,590 +569,428 @@ ${Object.entries(results.sectoralImpact).map(([sector, data]) =>
                 </CardContent>
               </Card>
 
+              {/* Sectoral Impact */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    AI Detection Engine
-                  </CardTitle>
-                  <CardDescription>Real-time processing status</CardDescription>
+                  <CardTitle>Sectoral Impact Analysis</CardTitle>
+                  <CardDescription>Ghana-specific sector breakdown</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>Processing Queue</span>
-                    <Badge variant="outline">{stats.processingQueue} items</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Avg Processing Time</span>
-                    <Badge variant="outline">{stats.averageProcessingTime}s</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Engine Status</span>
-                    <Badge className="bg-green-100 text-green-800">Active</Badge>
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Pattern Recognition</span>
-                      <span>94.2%</span>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Petroleum Sector</span>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">45 violations</div>
+                        <div className="text-xs text-muted-foreground">GHS 1,708,435 recovery</div>
+                      </div>
                     </div>
-                    <Progress value={94.2} className="h-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Anomaly Detection</span>
-                      <span>87.8%</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Textiles Sector</span>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">28 violations</div>
+                        <div className="text-xs text-muted-foreground">GHS 683,374 recovery</div>
+                      </div>
                     </div>
-                    <Progress value={87.8} className="h-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Risk Assessment</span>
-                      <span>91.5%</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Vehicles Sector</span>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">16 violations</div>
+                        <div className="text-xs text-muted-foreground">GHS 455,583 recovery</div>
+                      </div>
                     </div>
-                    <Progress value={91.5} className="h-2" />
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          {/* PCA Workflow Tab */}
-          <TabsContent value="workflow" className="space-y-6">
-            {/* Execution Configuration */}
+          {/* Audit Cases Tab */}
+          <TabsContent value="audit-cases" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Audit Cases</h3>
+              <Button>
+                <Upload className="w-4 h-4 mr-2" />
+                New Case
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {auditCases.map((auditCase) => (
+                <Card key={auditCase.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{auditCase.name}</CardTitle>
+                      <Badge variant={auditCase.status === 'completed' ? 'default' : auditCase.status === 'running' ? 'secondary' : 'outline'}>
+                        {auditCase.status}
+                      </Badge>
+                    </div>
+                    <CardDescription>{auditCase.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Case ID:</span>
+                        <span className="font-mono">{auditCase.id}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Created:</span>
+                        <span>{new Date(auditCase.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      {auditCase.results && (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span>Declarations:</span>
+                            <span>{auditCase.results.totalDeclarations.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Violations:</span>
+                            <span>{auditCase.results.violationsDetected}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Recovery:</span>
+                            <span>GHS {auditCase.results.recoveryAmount.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Accuracy:</span>
+                            <span>{auditCase.results.accuracy}%</span>
+                          </div>
+                          {auditCase.results.sectoralImpact && (
+                            <div className="mt-3 pt-3 border-t">
+                              <div className="text-sm font-medium mb-2">Sectoral Impact:</div>
+                              {Object.entries(auditCase.results.sectoralImpact).map(([sector, data]) => (
+                                <div key={sector} className="flex justify-between text-xs mb-1">
+                                  <span className="capitalize">{sector}:</span>
+                                  <span>{data.violations} violations (GHS {data.recovery.toLocaleString()})</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Execution Tab */}
+          <TabsContent value="execution" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Execution Configuration</CardTitle>
-                <CardDescription>Configure PCA execution parameters and date range</CardDescription>
+                <CardTitle>Audit Execution Control</CardTitle>
+                <CardDescription>Manage and monitor audit execution</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Period Selection with Flexible Date Range */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <Label>Analysis Period</Label>
-                    <Select value={executionConfig.period} onValueChange={(value) => {
-                      // Calculate date ranges based on selection
-                      const today = new Date('2025-11-18');
-                      let newCustomRange = { ...executionConfig.customRange };
-                      
-                      switch(value) {
-                        case 'last7days':
-                          const last7 = new Date(today);
-                          last7.setDate(today.getDate() - 7);
-                          newCustomRange = { 
-                            start: format(last7, 'yyyy-MM-dd'), 
-                            end: format(today, 'yyyy-MM-dd') 
-                          };
-                          break;
-                        case 'last30days':
-                          const last30 = new Date(today);
-                          last30.setDate(today.getDate() - 30);
-                          newCustomRange = { 
-                            start: format(last30, 'yyyy-MM-dd'), 
-                            end: format(today, 'yyyy-MM-dd') 
-                          };
-                          break;
-                        case 'last90days':
-                          const last90 = new Date(today);
-                          last90.setDate(today.getDate() - 90);
-                          newCustomRange = { 
-                            start: format(last90, 'yyyy-MM-dd'), 
-                            end: format(today, 'yyyy-MM-dd') 
-                          };
-                          break;
-                        case 'ytd':
-                          newCustomRange = { 
-                            start: '2025-01-01', 
-                            end: format(today, 'yyyy-MM-dd') 
-                          };
-                          break;
-                        case 'lastyear':
-                          newCustomRange = { 
-                            start: '2024-01-01', 
-                            end: '2024-12-31' 
-                          };
-                          break;
-                        // 'custom' keeps existing dates
-                      }
-                      
-                      setExecutionConfig({
-                        ...executionConfig, 
-                        period: value,
-                        customRange: newCustomRange
-                      });
-                      
-                      // Update calendar dates if not custom
-                      if (value !== 'custom') {
-                        setStartDate(new Date(newCustomRange.start));
-                        setEndDate(new Date(newCustomRange.end));
-                      }
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select period" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="custom">Custom Date Range</SelectItem>
-                        <SelectItem value="last7days">Last 7 Days</SelectItem>
-                        <SelectItem value="last30days">Last 30 Days</SelectItem>
-                        <SelectItem value="last90days">Last 90 Days</SelectItem>
-                        <SelectItem value="ytd">Year to Date</SelectItem>
-                        <SelectItem value="lastyear">Last Year</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    {executionConfig.period === 'custom' && (
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-sm">From Date</Label>
-                          <Popover open={showStartCalendar} onOpenChange={setShowStartCalendar}>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {format(startDate, 'PPP')}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={startDate}
-                                onSelect={(date) => {
-                                  setStartDate(date);
-                                  setShowStartCalendar(false);
-                                  setExecutionConfig({
-                                    ...executionConfig,
-                                    customRange: {
-                                      ...executionConfig.customRange,
-                                      start: format(date, 'yyyy-MM-dd')
-                                    }
-                                  });
-                                }}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-
-                        <div>
-                          <Label className="text-sm">To Date</Label>
-                          <Popover open={showEndCalendar} onOpenChange={setShowEndCalendar}>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {format(endDate, 'PPP')}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={endDate}
-                                onSelect={(date) => {
-                                  setEndDate(date);
-                                  setShowEndCalendar(false);
-                                  setExecutionConfig({
-                                    ...executionConfig,
-                                    customRange: {
-                                      ...executionConfig.customRange,
-                                      end: format(date, 'yyyy-MM-dd')
-                                    }
-                                  });
-                                }}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <Button 
+                    onClick={handleExecutePCA} 
+                    disabled={isExecuting}
+                    className="flex items-center"
+                  >
+                    {isExecuting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Running...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 mr-2" />
+                        Start Audit
+                      </>
                     )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label>Risk Threshold</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Minimum Risk Score</span>
-                        <span className="text-sm font-medium">{executionConfig.riskThreshold}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={executionConfig.riskThreshold}
-                        onChange={(e) => setExecutionConfig({...executionConfig, riskThreshold: parseInt(e.target.value)})}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="advanced-filters"
-                        checked={executionConfig.useAdvancedFilters}
-                        onCheckedChange={(checked) => setExecutionConfig({...executionConfig, useAdvancedFilters: checked})}
-                      />
-                      <Label htmlFor="advanced-filters">Use Advanced Filters</Label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="deep-analysis"
-                        checked={executionConfig.deepAnalysis}
-                        onCheckedChange={(checked) => setExecutionConfig({...executionConfig, deepAnalysis: checked})}
-                      />
-                      <Label htmlFor="deep-analysis">Deep Analysis Mode</Label>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Country and Declaration Type Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label>Origin Countries</Label>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Select one or more countries of shipment origin</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['GH', 'NG', 'KE', 'CN'].map((country) => (
-                          <div key={country} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id={`country-${country}`}
-                              checked={executionConfig.countries.includes(country)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setExecutionConfig({...executionConfig, countries: [...executionConfig.countries, country]});
-                                } else {
-                                  setExecutionConfig({...executionConfig, countries: executionConfig.countries.filter(c => c !== country)});
-                                }
-                              }}
-                              className="rounded"
-                            />
-                            <Label htmlFor={`country-${country}`} className="flex items-center gap-1">
-                              <span>{countryFlags[country]}</span>
-                              <span className="text-sm">{country}</span>
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Declaration Types</Label>
-                    <div className="space-y-2">
-                      {['Import', 'Export', 'Transit'].map((type) => (
-                        <div key={type} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`type-${type.toLowerCase()}`}
-                            checked={executionConfig.declarationTypes.includes(type.toLowerCase())}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setExecutionConfig({...executionConfig, declarationTypes: [...executionConfig.declarationTypes, type.toLowerCase()]});
-                              } else {
-                                setExecutionConfig({...executionConfig, declarationTypes: executionConfig.declarationTypes.filter(t => t !== type.toLowerCase())});
-                              }
-                            }}
-                            className="rounded"
-                          />
-                          <Label htmlFor={`type-${type.toLowerCase()}`} className="text-sm">{type}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-4 pt-4">
-                  {!isExecuting ? (
-                    <Button onClick={handleExecutePCA} className="bg-blue-600 hover:bg-blue-700">
-                      <Play className="h-4 w-4 mr-2" />
-                      Execute PCA
-                    </Button>
-                  ) : (
-                    <Button onClick={handlePauseExecution} variant="outline">
-                      <Pause className="h-4 w-4 mr-2" />
+                  </Button>
+                  
+                  {isExecuting && (
+                    <Button variant="outline" onClick={handlePauseExecution}>
+                      <Pause className="w-4 h-4 mr-2" />
                       Pause
                     </Button>
                   )}
-                  {executionProgress > 0 && !isExecuting && (
-                    <Button onClick={handleResumeExecution} variant="outline">
-                      <Play className="h-4 w-4 mr-2" />
-                      Resume
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={() => setExecutionProgress(0)}>
-                    <RotateCcw className="h-4 w-4 mr-2" />
+                  
+                  <Button variant="outline">
+                    <RotateCcw className="w-4 h-4 mr-2" />
                     Reset
                   </Button>
                 </div>
-
-                {/* Execution Progress */}
-                {executionProgress > 0 && (
+                
+                {isExecuting && (
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Execution Progress</span>
-                      <span className="text-sm">{Math.round(executionProgress)}%</span>
+                    <div className="flex justify-between text-sm">
+                      <span>Progress:</span>
+                      <span>{executionProgress.toFixed(1)}%</span>
                     </div>
-                    <Progress value={executionProgress} className="h-2" />
-                    {executionProgress < 100 && (
-                      <p className="text-sm text-muted-foreground">Processing declarations... {Math.round(executionProgress * 1.5)} of {Math.round(150 * 1.5)} completed</p>
-                    )}
-                    {executionProgress >= 100 && (
-                      <p className="text-sm text-green-600">✅ PCA execution completed successfully!</p>
-                    )}
+                    <Progress value={executionProgress} className="w-full" />
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Historical Audits */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Historical PCA Audits</CardTitle>
-                <CardDescription>Previous audit results and reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {pcaHistory.map((audit) => (
-                    <div key={audit.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-2 h-2 rounded-full ${audit.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                        <div>
-                          <h4 className="font-medium">{audit.id}</h4>
-                          <p className="text-sm text-muted-foreground">{audit.date} • {audit.type.toUpperCase()}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{audit.violations} violations</p>
-                          <p className="text-sm text-muted-foreground">Risk Score: {audit.score}</p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRetrieveHistoricalReport(audit.id)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Report
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="scope">Audit Scope</Label>
+                    <Select defaultValue="all">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Declarations</SelectItem>
+                        <SelectItem value="hs-codes">Specific HS Codes</SelectItem>
+                        <SelectItem value="shipments">Specific Shipments</SelectItem>
+                        <SelectItem value="declarations">Specific Declarations</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="risk-threshold">Risk Threshold</Label>
+                    <Select defaultValue="70">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="50">Low (50%)</SelectItem>
+                        <SelectItem value="70">Medium (70%)</SelectItem>
+                        <SelectItem value="85">High (85%)</SelectItem>
+                        <SelectItem value="95">Critical (95%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="sector">Sector Focus</Label>
+                    <Select defaultValue="all">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Sectors</SelectItem>
+                        <SelectItem value="petroleum">Petroleum</SelectItem>
+                        <SelectItem value="textiles">Textiles</SelectItem>
+                        <SelectItem value="vehicles">Vehicles</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reportTypes.map((report) => {
-                const IconComponent = report.icon;
-                return (
-                  <Card key={report.id} className={`cursor-pointer transition-all ${selectedReport === report.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'}`} onClick={() => handleReportSelect(report.id)}>
+          <TabsContent value="reports" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Generated Reports</h3>
+              <Button>
+                <Download className="w-4 h-4 mr-2" />
+                Export All
+              </Button>
+            </div>
+            
+            {/* Existing Reports */}
+            {auditReports.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-muted-foreground">Recent Reports</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {auditReports.map((report) => (
+                    <Card key={report.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm">{report.name}</CardTitle>
+                          <Badge variant="outline">{report.type}</Badge>
+                        </div>
+                        <CardDescription>
+                          Generated: {new Date(report.generatedAt).toLocaleDateString()}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {report.content && (
+                            <>
+                              {report.content.totalViolations && (
+                                <div className="flex justify-between text-xs">
+                                  <span>Violations:</span>
+                                  <span>{report.content.totalViolations}</span>
+                                </div>
+                              )}
+                              {report.content.recoveryAmount && (
+                                <div className="flex justify-between text-xs">
+                                  <span>Recovery:</span>
+                                  <span>GHS {report.content.recoveryAmount.toLocaleString()}</span>
+                                </div>
+                              )}
+                              {report.content.complianceScore && (
+                                <div className="flex justify-between text-xs">
+                                  <span>Compliance:</span>
+                                  <span>{report.content.complianceScore}%</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          <div className="flex space-x-2 pt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                const content = generateReportContent(
+                                  auditCases.find(c => c.id === report.caseId),
+                                  report.type
+                                );
+                                const blob = new Blob([content], { type: 'text/plain' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `${report.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              }}
+                            >
+                              <Download className="w-3 h-3 mr-1" />
+                              Download
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="w-3 h-3 mr-1" />
+                              Preview
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Generate New Reports */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-muted-foreground">Generate New Reports</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reportTypes.map((report) => (
+                  <Card key={report.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <IconComponent className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{report.name}</CardTitle>
-                          <CardDescription>{report.description}</CardDescription>
-                        </div>
-                      </div>
+                      <CardTitle className="flex items-center">
+                        <report.icon className="w-5 h-5 mr-2" />
+                        {report.name}
+                      </CardTitle>
+                      <CardDescription>{report.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Button variant="outline" className="w-full" onClick={(e) => { e.stopPropagation(); handleDownloadReport(report.id); }}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleGenerateReport(report.id)}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Generate
                       </Button>
                     </CardContent>
                   </Card>
-                );
-              })}
+                ))}
+              </div>
             </div>
-
-            {selectedReport && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Report Preview: {reportTypes.find(r => r.id === selectedReport)?.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Report ID:</span> RPT-2025-{Math.random().toString(36).substr(2, 9).toUpperCase()}
-                      </div>
-                      <div>
-                        <span className="font-medium">Generated:</span> {new Date().toLocaleDateString()}
-                      </div>
-                      <div>
-                        <span className="font-medium">Period:</span> {executionConfig.period === 'custom' ? `${executionConfig.customRange.start} to ${executionConfig.customRange.end}` : executionConfig.period}
-                      </div>
-                      <div>
-                        <span className="font-medium">Status:</span> <Badge className="bg-green-100 text-green-800">Ready</Badge>
-                      </div>
-                    </div>
-                    <Separator />
-                    <div className="h-64 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <p className="text-slate-500">Report preview would be displayed here</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Full Report
-                      </Button>
-                      <Button variant="outline">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Share
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
-          {/* Evidence Export Tab */}
-          <TabsContent value="evidence" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Evidence Export</CardTitle>
-                <CardDescription>Export evidence packages for compliance and legal proceedings</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <Label htmlFor="case-reference">Case Reference</Label>
-                    <Input id="case-reference" placeholder="Enter case reference number" />
-                  </div>
-                  <div className="space-y-4">
-                    <Label htmlFor="export-format">Export Format</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select format" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pdf">PDF Package</SelectItem>
-                        <SelectItem value="zip">ZIP Archive</SelectItem>
-                        <SelectItem value="secure">Secure Digital Package</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="evidence-types">Evidence Types</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {['Declaration Documents', 'Supporting Documents', 'AI Analysis Reports', 'Communication Logs', 'Audit Trails', 'Photographic Evidence', 'Financial Records', 'Compliance Certificates'].map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <input type="checkbox" id={`evidence-${type}`} className="rounded" defaultChecked />
-                        <Label htmlFor={`evidence-${type}`} className="text-sm">{type}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="additional-notes">Additional Notes</Label>
-                  <Textarea id="additional-notes" placeholder="Enter any additional notes or requirements for the evidence package" rows={3} />
-                </div>
-
-                <div className="flex gap-4">
-                  <Button onClick={handleGenerateEvidencePackage}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Generate Evidence Package
-                  </Button>
-                  <Button variant="outline" onClick={handlePreviewPackage}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Preview Package
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>ICUMS Integration</CardTitle>
-                  <CardDescription>Configure ICUMS database connection</CardDescription>
+                  <CardTitle>Country Breakdown</CardTitle>
+                  <CardDescription>Declarations and violations by country</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Connection Status</p>
-                      <p className="text-sm text-muted-foreground">Last sync: 2 minutes ago</p>
-                    </div>
-                    <Badge className={countryConfigs[selectedCountry].connected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                      {countryConfigs[selectedCountry].connected ? "Connected" : "Disconnected"}
-                    </Badge>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(stats.countryBreakdown).map(([country, data]) => (
+                      <div key={country} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg">{countryFlags[country as keyof typeof countryFlags]}</span>
+                          <span className="text-sm font-medium">{country}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm">{data.declarations.toLocaleString()} decl.</div>
+                          <div className="text-xs text-muted-foreground">{data.violations} violations</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="server-url">Server URL</Label>
-                    <Input id="server-url" defaultValue={countryConfigs[selectedCountry].serverUrl} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="api-key">API Key</Label>
-                    <Input id="api-key" type="password" defaultValue={countryConfigs[selectedCountry].apiKey} />
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Test Connection
-                  </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Detection Engine</CardTitle>
-                  <CardDescription>AI detection parameters</CardDescription>
+                  <CardTitle>System Performance</CardTitle>
+                  <CardDescription>Real-time system metrics</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="auto-learning">Auto-Learning Mode</Label>
-                      <Switch id="auto-learning" defaultChecked />
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>Processing Queue:</span>
+                      <span className="font-mono">{stats.processingQueue}</span>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="real-time">Real-time Processing</Label>
-                      <Switch id="real-time" defaultChecked />
+                    <div className="flex justify-between">
+                      <span>Avg Processing Time:</span>
+                      <span className="font-mono">{stats.averageProcessingTime}s</span>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sensitivity">Detection Sensitivity</Label>
-                    <Select defaultValue="high">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="maximum">Maximum</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="update-frequency">Model Update Frequency</Label>
-                    <Select defaultValue="weekly">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex justify-between">
+                      <span>System Uptime:</span>
+                      <span className="font-mono">99.8%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Last Updated:</span>
+                      <span className="font-mono text-xs">{stats.lastUpdated}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Configuration</CardTitle>
+                <CardDescription>Configure Ghana PCA AI System settings</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold">AI Model Settings</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="auto-learning">Auto-Learning Mode</Label>
+                        <Switch id="auto-learning" defaultChecked />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="real-time">Real-time Processing</Label>
+                        <Switch id="real-time" defaultChecked />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold">Ghana Integration</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="icums-url">ICUMS API URL</Label>
+                      <Input id="icums-url" defaultValue="https://icums.gov.gh/api/v2" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="api-key">API Key</Label>
+                      <Input id="api-key" type="password" defaultValue="•••••••••••••••" />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button>Save Settings</Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
